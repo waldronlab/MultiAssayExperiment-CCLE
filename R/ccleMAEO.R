@@ -11,13 +11,8 @@
 library(readr)
 library(MultiAssayExperiment)
 
-
-# orininal working directory
-working0 <- getwd()
-
 # data directories
-data <- "~/Source/MultiAssayExperiment-CCLE/data"
-#data <- "rawdata"
+data <- "rawdata"
 
 # set working directory as data directory
 setwd(data)
@@ -33,16 +28,16 @@ rownames(mRNAexpression) <- mRNAexpression$Name
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Name")]
 
 # save objects as rsd files
-saveRDS(DNAcopyNumber, file = paste0(data, "/DNAcopyNumber.rds"))
-saveRDS(mRNAexpression, file = paste0(data, "/mRNAexpression.rds"))
-saveRDS(mutations, file = paste0(data, "/mutations.rds"))
-saveRDS(pData, file = paste0(data, "/pData.rds"))
-
-# restore orininal working directory
-setwd(working0)
+saveRDS(DNAcopyNumber, file = "DNAcopyNumber.rds")
+saveRDS(mRNAexpression, file = "mRNAexpression.rds")
+saveRDS(mutations, file = "mutations.rds")
+saveRDS(pData, file = "pData.rds")
 
 # load objects from rsd files
-readRDS(paste0(data, "/DNAcopyNumber.rds"))
-readRDS(paste0(data, "/mRNAexpression.rds"))
-readRDS(paste0(data, "/mutations.rds"))
-readRDS(paste0(data, "/pData.rds"))
+DNAcopyNumber <- readRDS("DNAcopyNumber.rds")
+mRNAexpression <- readRDS("mRNAexpression.rds")
+mutations <- readRDS("mutations.rds")
+pData <- readRDS("pData.rds")
+
+# generate CCLE MAEO
+#TODO
