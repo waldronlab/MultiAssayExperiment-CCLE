@@ -11,6 +11,7 @@
 library(readr)
 library(MultiAssayExperiment)
 library(TCGAmisc)
+library(Biobase)
 library(SummarizedExperiment)
 library(GenomicRanges)
 
@@ -20,10 +21,19 @@ DNAcopyNumber <- read_delim("rawdata/CCLE_copynumber_byGene_2012-09-29.txt", del
 mRNAexpression <-read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct", delim = "\t", skip = 2)
 mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf", delim = "\t", na = "<NA>")
 pData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")
+pData <- DataFrame(pData)
 
 # add rownames to mRNAexpression
 rownames(mRNAexpression) <- mRNAexpression$Name
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Name")]
+annoteFeatures <- mRNAexpression[, "Description"]
+mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Description")]
+mRNAexpression <- as.matrix(mRNAexpression)
+
+specIDS <- unique(pData$CCLE.Cell.Line.Name)
+mRNAEx <- mRNAexpression[, colnames(mRNAexpression) %in% specIDS]
+
+mRNAEset <- ExpressionSet(assayData = mRNAEx)
 
 # save objects as rsd files
 if (!dir.exists("rdsdata")) {dir.create("rdsdata")}
