@@ -14,6 +14,7 @@ library(TCGAmisc)
 library(Biobase)
 library(SummarizedExperiment)
 library(GenomicRanges)
+library(S4Vectors)
 
 # read in data sets
 if (!dir.exists("rawdata")) {dir.create("rawdata")}
@@ -22,6 +23,20 @@ mRNAexpression <-read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct", del
 mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf", delim = "\t", na = "<NA>")
 pData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")
 pData <- DataFrame(pData)
+splitData <- split(pData, pData$CCLE.Cell.Line.Name)
+gg <- lapply(splitData, function(aa) {
+DataFrame(lapply(aa, function(column) {
+    if (length(unique(column)) == 1L) {
+        return(unique(column))
+    } else {
+        return(SimpleList(column))
+    }
+}))
+})
+cc <- do.call(rbind, gg)
+rownames(cc) <- cc$CCLE.Cell.Line.Name
+cc <- cc[, -1]
+
 
 # add rownames to mRNAexpression
 rownames(mRNAexpression) <- mRNAexpression$Name
