@@ -25,7 +25,7 @@ pData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")
 pData <- DataFrame(pData)
 splitData <- S4Vectors::split(pData, pData$CCLE.Cell.Line.Name)
 source("R/drugDataFrame.R")
-doseVars <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
+pData <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
 
 # add rownames to mRNAexpression
 rownames(mRNAexpression) <- mRNAexpression$Name
