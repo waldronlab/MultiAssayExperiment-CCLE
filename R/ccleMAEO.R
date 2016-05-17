@@ -24,19 +24,8 @@ mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeu
 pData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")
 pData <- DataFrame(pData)
 splitData <- S4Vectors::split(pData, pData$CCLE.Cell.Line.Name)
-gg <- lapply(splitData, function(aa) {
-clDF <- DataFrame(lapply(aa, function(column) {
-    if (length(unique(column)) == 1L) {
-        return(unique(column))
-    } else {
-        return(SimpleList(column))
-    }
-}))
-})
-cc <- do.call(rbind, gg)
-rownames(cc) <- cc$CCLE.Cell.Line.Name
-cc <- cc[, -1]
-
+source("R/drugDataFrame.R")
+doseVars <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
 
 # add rownames to mRNAexpression
 rownames(mRNAexpression) <- mRNAexpression$Name

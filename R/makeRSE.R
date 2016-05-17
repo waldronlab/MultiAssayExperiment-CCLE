@@ -1,4 +1,4 @@
-makeRSE <- function(dataset){
+makeRSE <- function(dataset) {
     grangeNames <- grep("name|chr|start|end$", names(dataset),
                         value = TRUE, ignore.case = TRUE)
     if (length(grangeNames) != 4L) {warning("not all rowRange columns found")}
