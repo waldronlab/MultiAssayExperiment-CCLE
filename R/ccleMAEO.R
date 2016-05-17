@@ -23,9 +23,9 @@ mRNAexpression <-read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct", del
 mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf", delim = "\t", na = "<NA>")
 pData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")
 pData <- DataFrame(pData)
-splitData <- split(pData, pData$CCLE.Cell.Line.Name)
+splitData <- S4Vectors::split(pData, pData$CCLE.Cell.Line.Name)
 gg <- lapply(splitData, function(aa) {
-DataFrame(lapply(aa, function(column) {
+clDF <- DataFrame(lapply(aa, function(column) {
     if (length(unique(column)) == 1L) {
         return(unique(column))
     } else {
