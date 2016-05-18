@@ -9,12 +9,12 @@
 
 # load necessary packages
 library(readr)
-library(MultiAssayExperiment)
+library(S4Vectors)
 library(TCGAmisc)
 library(Biobase)
 library(SummarizedExperiment)
 library(GenomicRanges)
-library(S4Vectors)
+library(MultiAssayExperiment)
 
 # read in data sets
 if (!dir.exists("rawdata")) {dir.create("rawdata")}
@@ -26,18 +26,21 @@ pData <- DataFrame(pData)
 splitData <- S4Vectors::split(pData, pData$CCLE.Cell.Line.Name)
 source("R/drugDataFrame.R")
 pData <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
+pData$TissueOrigin <- gsub("^[^_]+_", "", rownames(pData), perl = TRUE)
 
 # add rownames to mRNAexpression
 rownames(mRNAexpression) <- mRNAexpression$Name
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Name")]
 annoteFeatures <- mRNAexpression[, "Description"]
+annoteFeatures <- data.frame(annoteFeatures)
+
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Description")]
 mRNAexpression <- as.matrix(mRNAexpression)
 
-specIDS <- unique(pData$CCLE.Cell.Line.Name)
-mRNAEx <- mRNAexpression[, colnames(mRNAexpression) %in% specIDS]
+mRNAEx <- mRNAexpression[, colnames(mRNAexpression) %in% rownames(pData)]
+rownames(annoteFeatures) <- rownames(mRNAEx)
 
-mRNAEset <- ExpressionSet(assayData = mRNAEx)
+mRNAEset <- ExpressionSet(assayData = mRNAEx, featureData = AnnotatedDataFrame(annoteFeatures))
 
 # save objects as rsd files
 if (!dir.exists("rdsdata")) {dir.create("rdsdata")}
@@ -52,18 +55,15 @@ mRNAexpression <- readRDS("rdsdata/mRNAexpression.rds")
 mutations <- readRDS("rdsdata/mutations.rds")
 pData <- readRDS("rdsdata/pData.rds")
 
-# pData specimen ID function, everything after underscore
-# use IDs as the rownames of the pData
-rownames(pData) <- paste(pData$`CCLE Cell Line Name`, pData$Compound, pData$Target, sep = ".")
+# use IDs as the rownames of the pData # see line 29
+# no function needed to translate cellLine names
+rownames(pData)
 
 
 # create a ExpressionSet or RangeSummarizedExperiment from
 # DNAcopyNumber, available from SummarizedExperiment package
 source("R/makeRSE.R")
 newRSE <- makeRSE(DNAcopyNumber)
-
-# create a ExpressionSet from mRNAexpression
-?ExpressionSet()
 
 # create a GRangesList from mutations
 ?GRangesList()
