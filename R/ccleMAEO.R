@@ -66,11 +66,10 @@ source("R/makeRSE.R")
 newRSE <- makeRSE(DNAcopyNumber)
 
 # create a GRangesList from mutations
-?GRangesList()
+newMut <- makeGRangesList(as.data.frame(mutations, stringsAsFactors = FALSE),
+                                        ccle(primary = "Tumor_Sample_Barcode",
+                                        standard = TRUE, idFUN = I))
 
-# split the tummor sample barcode and make list thereof
-# duplicate makeGRangesList method from TCGAmics package
-?makeGRangesList()
 
 # generate CCLE MAEO by passing these arguments to the MultiAssayExperiment method
 # specimine ID (short spec), assay (long spec), assayname (e.g. DNAcopyNumber)
