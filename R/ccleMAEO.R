@@ -58,8 +58,7 @@ pData <- readRDS("rdsdata/pData.rds")
 
 # use IDs as the rownames of the pData # see line 29
 # no function needed to translate cellLine names
-rownames(pData)
-
+# rownames(pData)
 
 # create a ExpressionSet or RangeSummarizedExperiment from
 # DNAcopyNumber, available from SummarizedExperiment package
@@ -70,11 +69,6 @@ newMut <- makeGRangesList(as.data.frame(mutations, stringsAsFactors = FALSE),
                                         ccle(primary = "Tumor_Sample_Barcode",
                                         standard = TRUE, idFUN = I))
 newMut <- RangedRaggedAssay(newMut)
-
-
-# generate CCLE MAEO by passing these arguments to the MultiAssayExperiment method
-# specimine ID (short spec), assay (long spec), assayname (e.g. DNAcopyNumber)
-?MultiAssayExperiment()
 
 dataList <- list(CNA = newRSE, Mutations = newMut, mRNA = mRNAEset)
 ## Insert map step here
