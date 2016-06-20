@@ -53,12 +53,12 @@ mRNAEset <- ExpressionSet(assayData = mRNAEx, featureData = AnnotatedDataFrame(a
 # rownames(pData)
 
 # create a RangeSummarizedExperiment from DNAcopyNumber
-newRSE <- makeRSE(DataFrame(DNAcopyNumber), regEx = c("chr$", "start$", "end$", "strand"))
+newRSE <- makeRangedSummarizedExperimentFromDataFrame(DataFrame(DNAcopyNumber), seqnames.field = "NumChr",
+                                                      start.field = "txStart", end.field = "txEnd")
 
 # create a GRangesList from mutations
-newMut <- makeGRangesList(as.data.frame(mutations, stringsAsFactors = FALSE),
-                                        ccle(primary = "Tumor_Sample_Barcode",
-                                        standard = TRUE, idFUN = I))
+newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors = FALSE),
+                                        partitioning.field = "Tumor_Sample_Barcode")
 newMut <- RangedRaggedAssay(newMut)
 
 dataList <- list(CNA = newRSE, Mutations = newMut, mRNA = mRNAEset)
