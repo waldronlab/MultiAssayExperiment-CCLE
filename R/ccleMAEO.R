@@ -7,7 +7,7 @@
 #
 ########################################################
 
-# load necessary packages
+# Load libraries ----------------------------------------------------------
 library(readr)
 library(S4Vectors)
 library(BiocInterfaces) # https://github.com/waldronlab/BiocInterfaces
@@ -16,13 +16,12 @@ library(SummarizedExperiment)
 library(GenomicRanges)
 library(MultiAssayExperiment) # https://github.com/vjcitn/MultiAssayExperiment
 
-# read in data sets
+# Check files and directories ---------------------------------------------
 if (!dir.exists("rawdata")) {dir.create("rawdata")}
 if (!file.exists("rawdata/CCLE_copynumber_byGene_2012-09-29.txt")) {stop("The file CCLE_copynumber_byGene_2012-09-29.txt must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
 if (!file.exists("rawdata/CCLE_Expression_Entrez_2012-09-29.gct")) {stop("The file CCLE_Expression_Entrez_2012-09-29.gct must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
 if (!file.exists("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf")) {stop("The file CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
 if (!file.exists("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")) {stop("The file CCLE_NP24.2009_Drug_data_2012.02.20.csv must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
-
 
 # DNA Copy Number ---------------------------------------------------------
 DNAcopyNumber <- read_delim("rawdata/CCLE_copynumber_byGene_2012-09-29.txt", delim = "\t")
@@ -54,13 +53,22 @@ mRNAEset <- ExpressionSet(assayData = mRNAEx, featureData = AnnotatedDataFrame(a
 
 
 # Mutations ---------------------------------------------------------------
-mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf", delim = "\t", na = "<NA>")
-
+types <- c("c", "i", "c", "i", "c", "i", "i", "c", "c", "c", "c", "c", 
+  "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", 
+  "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", 
+  "c", "c", "c", "c", "c", "c", "c", "c", "c", "i", "i", "c", "c" )
+types2 <- paste(types, collapse = "")
+mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf",
+                        delim = "\t", na = "<NA>", col_types = types2)
 # create a GRangesList from mutations
 newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors = FALSE),
-                                        partitioning.field = "Tumor_Sample_Barcode")
+                                      names.field = "Hugo_Symbol",
+                                      partitioning.field = "Tumor_Sample_Barcode",
+                                      start.field = "Start_position", 
+                                      end.field = "End_position",
+                                      keep.extra.columns = TRUE)
 newMut <- RangedRaggedAssay(newMut)
-
+genome(newMut) <- BiocInterfaces:::.setHGBuild("37")
 
 
 # primary DataFrame -------------------------------------------------------
