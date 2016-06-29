@@ -52,3 +52,4 @@ return(drugMatrix)
 
 names(pData2[[1]])
 getDrugMatrix(pData2, "EC50.uM.", combos)
+combos
