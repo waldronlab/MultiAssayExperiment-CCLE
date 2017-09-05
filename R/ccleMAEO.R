@@ -10,18 +10,33 @@
 # Load libraries ----------------------------------------------------------
 library(readr)
 library(S4Vectors)
-library(BiocInterfaces) # https://github.com/waldronlab/BiocInterfaces
+library(TCGAutils) # https://github.com/waldronlab/TCGAutils
 library(Biobase)
 library(SummarizedExperiment)
 library(GenomicRanges)
 library(MultiAssayExperiment) # https://github.com/vjcitn/MultiAssayExperiment
+library(RaggedExperiment)
+library(downloader)
 
 # Check files and directories ---------------------------------------------
-if (!dir.exists("rawdata")) {dir.create("rawdata")}
-if (!file.exists("rawdata/CCLE_copynumber_byGene_2012-09-29.txt")) {stop("The file CCLE_copynumber_byGene_2012-09-29.txt must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
-if (!file.exists("rawdata/CCLE_Expression_Entrez_2012-09-29.gct")) {stop("The file CCLE_Expression_Entrez_2012-09-29.gct must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
-if (!file.exists("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf")) {stop("The file CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
-if (!file.exists("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")) {stop("The file CCLE_NP24.2009_Drug_data_2012.02.20.csv must exist in the rawdata directory. \n It can be downloaded from http://www.broadinstitute.org/ccle/data/browseData")}
+dataURL <- "https://portals.broadinstitute.org/ccle_legacy_data/"
+folders <- c("dna_copy_number", "hybrid_capture_sequencing",
+    "mRNA_expression", "pharmacological_profiling")
+
+filesOfInterest <- c("CCLE_copynumber_byGene_2012-09-29.txt",
+    "CCLE_Expression_Entrez_2012-09-29.gct",
+    "CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf",
+    "CCLE_NP24.2009_Drug_data_2012.02.20.csv")
+
+if (!dir.exists("rawdata")) { dir.create("rawdata") }
+
+for (i in seq_along(filesOfInterest)) {
+    if (!file.exists(file.path("rawdata", filesOfInterest[i]))) {
+        message(filesOfInterest[i], " not found in the 'rawdata' folder")
+        download(paste0(dataURL, folders[i], filesOfInterest[i]),
+                 destfile = file.path("rawdata", filesOfInterest[i]))
+    }
+}
 
 # DNA Copy Number ---------------------------------------------------------
 DNAcopyNumber <- read_delim("rawdata/CCLE_copynumber_byGene_2012-09-29.txt", delim = "\t")
@@ -53,9 +68,9 @@ mRNAEset <- ExpressionSet(assayData = mRNAEx, featureData = AnnotatedDataFrame(a
 
 
 # Mutations ---------------------------------------------------------------
-types <- c("c", "i", "c", "i", "c", "i", "i", "c", "c", "c", "c", "c", 
-  "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", 
-  "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", 
+types <- c("c", "i", "c", "i", "c", "i", "i", "c", "c", "c", "c", "c",
+  "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c",
+  "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c",
   "c", "c", "c", "c", "c", "c", "c", "c", "c", "i", "i", "c", "c" )
 types2 <- paste(types, collapse = "")
 mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf",
@@ -64,7 +79,7 @@ mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeu
 newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors = FALSE),
                                       names.field = "Hugo_Symbol",
                                       partitioning.field = "Tumor_Sample_Barcode",
-                                      start.field = "Start_position", 
+                                      start.field = "Start_position",
                                       end.field = "End_position",
                                       keep.extra.columns = TRUE)
 newMut <- RangedRaggedAssay(newMut)
