@@ -23,7 +23,7 @@ dataURL <- "https://portals.broadinstitute.org/ccle_legacy_data/"
 folders <- c("dna_copy_number", "hybrid_capture_sequencing",
     "mRNA_expression", "pharmacological_profiling")
 
-filesOfInterest <- c("CCLE_copynumber_byGene_2012-09-29.txt",
+filesOfInterest <- c("CCLE_copynumber_byGene_2013-12-03.txt",
     "CCLE_Expression_Entrez_2012-09-29.gct",
     "CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf",
     "CCLE_NP24.2009_Drug_data_2012.02.20.csv")
@@ -43,9 +43,17 @@ DNAcopyNumber <- read_delim("rawdata/CCLE_copynumber_byGene_2012-09-29.txt", del
 
 # create a RangeSummarizedExperiment from DNAcopyNumber
 DNAcopyNumber <- DataFrame(DNAcopyNumber)
-newRSE <- makeRangedSummarizedExperimentFromDataFrame(DNAcopyNumber, names.field = "geneName", seqnames.field = "NumChr",
-                                                      start.field = "txStart", end.field = "txEnd")
-
+rowRanges <- unlist(makeGRangesListFromDataFrame(DNAcopyNumber,
+    names.field = "SYMBOL", seqnames.field = "CHR", start.field = "CHRLOC",
+    end.field = "CHRLOCEND"), use.names = FALSE)
+EGID <- DNAcopyNumber[, "EGID"]
+# Extract SITE info from column names
+# lapply(strsplit(colnames(DNAcopyNumber), "_"), `[`, 2L)
+newRSE <- makeSummarizedExperimentFromDataFrame(DNAcopyNumber[,
+    -which(names(DNAcopyNumber) %in% c("EGID", "SYMBOL"))],
+    seqnames.field = "CHR", start.field = "CHRLOC", end.field = "CHRLOCEND")
+rowRanges(newRSE) <- rowRanges
+rowData(newRSE) <- EGID
 
 # mRNA Expression Entrez --------------------------------------------------
 mRNAexpression <- read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct", delim = "\t", skip = 2)
@@ -64,7 +72,6 @@ mRNAEx <- mRNAexpression[, colnames(mRNAexpression) %in% rownames(pData)]
 rownames(annoteFeatures) <- rownames(mRNAEx)
 
 mRNAEset <- ExpressionSet(assayData = mRNAEx, featureData = AnnotatedDataFrame(annoteFeatures))
-
 
 
 # Mutations ---------------------------------------------------------------
