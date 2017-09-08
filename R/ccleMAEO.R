@@ -85,7 +85,7 @@ mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeu
 # create a GRangesList from mutations
 newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors = FALSE),
                                       names.field = "Hugo_Symbol",
-                                      partitioning.field = "Tumor_Sample_Barcode",
+                                      split.field = "Tumor_Sample_Barcode",
                                       start.field = "Start_position",
                                       end.field = "End_position",
                                       keep.extra.columns = TRUE)
