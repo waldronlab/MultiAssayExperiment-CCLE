@@ -89,8 +89,8 @@ newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors
                                       start.field = "Start_position",
                                       end.field = "End_position",
                                       keep.extra.columns = TRUE)
-newMut <- RangedRaggedAssay(newMut)
-genome(newMut) <- BiocInterfaces:::.setHGBuild("37")
+newMut <- RaggedExperiment(newMut)
+genome(newMut) <- TCGAutils:::.getHGBuild("37")
 
 
 # primary DataFrame -------------------------------------------------------
