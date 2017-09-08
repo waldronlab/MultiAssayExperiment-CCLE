@@ -39,7 +39,7 @@ for (i in seq_along(filesOfInterest)) {
 }
 
 # DNA Copy Number ---------------------------------------------------------
-DNAcopyNumber <- read_delim("rawdata/CCLE_copynumber_byGene_2012-09-29.txt", delim = "\t")
+DNAcopyNumber <- read_delim("rawdata/CCLE_copynumber_byGene_2013-12-03.txt", delim = "\t")
 
 # create a RangeSummarizedExperiment from DNAcopyNumber
 DNAcopyNumber <- DataFrame(DNAcopyNumber)
@@ -94,9 +94,9 @@ genome(newMut) <- TCGAutils:::.getHGBuild("37")
 
 
 # primary DataFrame -------------------------------------------------------
-pData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2012.02.20.csv")
-pData <- DataFrame(pData)
-splitData <- S4Vectors::split(pData, pData$CCLE.Cell.Line.Name)
+colData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2015.02.24.csv")
+colData <- DataFrame(colData)
+splitData <- S4Vectors::split(colData, colData[["CCLE.Cell.Line.Name"]])
 source("R/drugDataFrame.R")
 pData <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
 pData$TissueOrigin <- gsub("^[^_]+_", "", rownames(pData), perl = TRUE)
