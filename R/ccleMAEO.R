@@ -98,12 +98,14 @@ colData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2015.02.24.csv")
 colData <- DataFrame(colData)
 splitData <- S4Vectors::split(colData, colData[["CCLE.Cell.Line.Name"]])
 source("R/drugDataFrame.R")
-pData <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
-pData$TissueOrigin <- gsub("^[^_]+_", "", rownames(pData), perl = TRUE)
+colData <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
 
-# use IDs as the rownames of the pData # see line 29
+## FIX ME see drugDataFrame()
+colData[["TissueOrigin"]] <- gsub("^[^_]+_", "", rownames(colData), perl = TRUE)
+
+# use IDs as the rownames of the colData # see line 29
 # no function needed to translate cellLine names
-# rownames(pData)
+# rownames(colData)
 
 
 # Experiment List ---------------------------------------------------------

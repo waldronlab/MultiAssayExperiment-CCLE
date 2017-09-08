@@ -32,6 +32,7 @@ drugDataFrame <- function(cellSplits, doseNames) {
         return(vars)
     }, doseColumns = doseNames)
 
+## FIX ME HERE
     doseVars <- lapply(newList, function(x) { DataFrame(do.call(cbind, x)) })
     doseVars <- do.call(rbind, doseVars)
     drugDat <- cbind(newDF, doseVars)
