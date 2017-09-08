@@ -19,21 +19,21 @@ library(RaggedExperiment)
 library(downloader)
 
 # Check files and directories ---------------------------------------------
-dataURL <- "https://portals.broadinstitute.org/ccle_legacy_data/"
+dataURL <- "https://data.broadinstitute.org/ccle_legacy_data"
 folders <- c("dna_copy_number", "hybrid_capture_sequencing",
     "mRNA_expression", "pharmacological_profiling")
 
 filesOfInterest <- c("CCLE_copynumber_byGene_2013-12-03.txt",
     "CCLE_Expression_Entrez_2012-09-29.gct",
     "CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf",
-    "CCLE_NP24.2009_Drug_data_2012.02.20.csv")
+    "CCLE_NP24.2009_Drug_data_2015.02.24.csv")
 
 if (!dir.exists("rawdata")) { dir.create("rawdata") }
 
 for (i in seq_along(filesOfInterest)) {
     if (!file.exists(file.path("rawdata", filesOfInterest[i]))) {
         message(filesOfInterest[i], " not found in the 'rawdata' folder")
-        download(paste0(dataURL, folders[i], filesOfInterest[i]),
+        download(file.path(dataURL, folders[i], filesOfInterest[i]),
                  destfile = file.path("rawdata", filesOfInterest[i]))
     }
 }
