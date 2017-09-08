@@ -1,5 +1,5 @@
 drugDataFrame <- function(cellSplits, doseNames) {
-    otherVars <- !(names(cellSplits[[1]]) %in% doseNames)
+    otherVars <- !(names(cellSplits[[1L]]) %in% doseNames)
     otherCols <- lapply(cellSplits, function(cellLine) {
         otherSub <- cellLine[otherVars]
         otherList <- lapply(otherSub, function(subCol) {

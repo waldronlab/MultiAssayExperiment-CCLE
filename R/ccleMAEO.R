@@ -60,7 +60,7 @@ mRNAexpression <- read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct", de
 
 # add rownames to mRNAexpression
 mRNAexpression <- DataFrame(mRNAexpression)
-rownames(mRNAexpression) <- mRNAexpression$Name
+rownames(mRNAexpression) <- mRNAexpression[["Name"]]
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Name")]
 annoteFeatures <- mRNAexpression[, "Description"]
 annoteFeatures <- data.frame(annoteFeatures)
@@ -89,8 +89,8 @@ newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors
                                       start.field = "Start_position",
                                       end.field = "End_position",
                                       keep.extra.columns = TRUE)
-newMut <- RaggedExperiment(newMut)
 genome(newMut) <- TCGAutils:::.getHGBuild("37")
+newMut <- RaggedExperiment(newMut)
 
 
 # primary DataFrame -------------------------------------------------------
@@ -125,4 +125,4 @@ newList <- PrepMultiAssay(dataList, pData, CCMap)
 
 
 # Create MultiAssayExperiment ---------------------------------------------
-ccleMAEO <- MultiAssayExperiment(newList$Elist, newList$pData, newList$sampleMap)
+ccleMAEO <- do.call(MultiAssayExperiment, newList)
