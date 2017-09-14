@@ -74,23 +74,22 @@ colData(newRSE) <- DataFrame(SITE, row.names = colnames(DNAcopyNumber[, rangeVar
 assayNames(newRSE) <- "copyNumber"
 
 # mRNA Expression Entrez --------------------------------------------------
-mRNAexpression <- read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct", delim = "\t", skip = 2)
+mRNAexpression <- read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct",
+    delim = "\t", skip = 2)
 
 # add rownames to mRNAexpression
 mRNAexpression <- DataFrame(mRNAexpression)
 rownames(mRNAexpression) <- mRNAexpression[["Name"]]
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Name")]
-annoteFeatures <- mRNAexpression[, "Description"]
-annoteFeatures <- data.frame(annoteFeatures)
+
+rowDat <- DataFrame(description = mRNAexpression[, "Description"])
+rownames(rowDat) <- rownames(mRNAexpression)
 
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Description")]
 mRNAexpression <- as.matrix(mRNAexpression)
 
-mRNAEx <- mRNAexpression[, colnames(mRNAexpression) %in% rownames(pData)]
-rownames(annoteFeatures) <- rownames(mRNAEx)
 
-mRNAEset <- ExpressionSet(assayData = mRNAEx, featureData = AnnotatedDataFrame(annoteFeatures))
-
+mRNASE <- SummarizedExperiment(mRNAexpression, rowData = annoteFeatures)
 
 # Mutations ---------------------------------------------------------------
 types <- c("c", "i", "c", "i", "c", "i", "i", "c", "c", "c", "c", "c",
