@@ -1,13 +1,33 @@
 drugDataFrame <- function(cellSplits, doseNames) {
-    otherVars <- !(names(cellSplits[[1L]]) %in% doseNames)
+    compressedListCandidates <- lapply(cellSplits, function(CL) {
+        apply(CL, 2, function(x) all(grepl(",", x)))
+    })
+    drugData <- Map(function(x, y) {
+        compListFrame <- x[y]
+        compListFrame[] <- apply(compListFrame, 2L, function(col) {
+            if (is.integer(col))
+                IRanges::IntegerList(strsplit(col, ","))
+            else if (is.numeric(col))
+                IRanges::NumericList(strsplit(col, ","))
+            else (is.character(col))
+                IRanges::CharacterList(strsplit(col, ","))
+        })
+        compListFrame
+    }, x = cellSplits, y = compressedListCandidates)
+    allNames <- Reduce(intersect, lapply(cellSplits, names))
+    otherVars <- allNames[!(allNames %in% doseNames)]
+    ## FIX HERE
     otherCols <- lapply(cellSplits, function(cellLine) {
-        otherSub <- cellLine[otherVars]
+        otherSub <- cellLine[, otherVars]
         otherList <- lapply(otherSub, function(subCol) {
             if (length(unique(subCol)) == 1L) {
                 return(unique(subCol))
             } else {
-                names(subCol) <- cellLine$Compound
-                subCol <- S4Vectors::SimpleList(subCol)
+                names(subCol) <- cellLine[["Compound"]]
+                if (is.integer(subCol))
+                    subCol <- IRanges::IntegerList(subCol)
+                else if (is.character(subCol))
+                    subCol <- IRanges::CharacterList(subCol)
                 return(subCol)
             }
         })

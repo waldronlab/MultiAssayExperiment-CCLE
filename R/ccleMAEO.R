@@ -8,15 +8,17 @@
 ########################################################
 
 # Load libraries ----------------------------------------------------------
-library(readr)
-library(S4Vectors)
-library(TCGAutils) # https://github.com/waldronlab/TCGAutils
-library(Biobase)
-library(SummarizedExperiment)
-library(GenomicRanges)
-library(MultiAssayExperiment) # https://github.com/vjcitn/MultiAssayExperiment
-library(RaggedExperiment)
-library(downloader)
+suppressPackageStartupMessages({
+    library(readr)
+    library(S4Vectors)
+    library(TCGAutils) # https://github.com/waldronlab/TCGAutils
+    library(Biobase)
+    library(SummarizedExperiment)
+    library(GenomicRanges)
+    library(MultiAssayExperiment) # https://github.com/vjcitn/MultiAssayExperiment
+    library(RaggedExperiment)
+    library(downloader)
+})
 
 # Check files and directories ---------------------------------------------
 dataURL <- "https://data.broadinstitute.org/ccle_legacy_data"
@@ -88,7 +90,6 @@ rownames(rowDat) <- rownames(mRNAexpression)
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Description")]
 mRNAexpression <- as.matrix(mRNAexpression)
 
-
 mRNASE <- SummarizedExperiment(mRNAexpression, rowData = annoteFeatures)
 
 # Mutations ---------------------------------------------------------------
@@ -108,7 +109,6 @@ newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors
                                       keep.extra.columns = TRUE)
 genome(newMut) <- TCGAutils:::.getHGBuild("37")
 newMut <- RaggedExperiment(newMut)
-
 
 # primary DataFrame -------------------------------------------------------
 colData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2015.02.24.csv")
