@@ -46,14 +46,32 @@ DNAcopyNumber <- DataFrame(DNAcopyNumber)
 rowRanges <- unlist(makeGRangesListFromDataFrame(DNAcopyNumber,
     names.field = "SYMBOL", seqnames.field = "CHR", start.field = "CHRLOC",
     end.field = "CHRLOCEND"), use.names = FALSE)
+
+# Save EntrezGene IDs for rowData
 EGID <- DNAcopyNumber[, "EGID"]
+
+otherNames <- c("EGID", "SYMBOL")
+# Take only relevant names
+DNAcopyNumber <- DNAcopyNumber[, !colnames(DNAcopyNumber) %in% otherNames]
+
+# Find necessary range info variables
+rangeVars <- -which(names(DNAcopyNumber) %in% c("CHR", "CHRLOC", "CHRLOCEND"))
+
 # Extract SITE info from column names
-# lapply(strsplit(colnames(DNAcopyNumber), "_"), `[`, 2L)
-newRSE <- makeSummarizedExperimentFromDataFrame(DNAcopyNumber[,
-    -which(names(DNAcopyNumber) %in% c("EGID", "SYMBOL"))],
+SITE <- gsub("(^[^_]+)_(\\w+$)", "\\2",
+    colnames(DNAcopyNumber[, rangeVars]), perl = TRUE)
+
+# Create SummarizedExperiment
+newRSE <- makeSummarizedExperimentFromDataFrame(DNAcopyNumber,
     seqnames.field = "CHR", start.field = "CHRLOC", end.field = "CHRLOCEND")
+
+# Add rowRanges > RangedSummarizedExperiment
 rowRanges(newRSE) <- rowRanges
-rowData(newRSE) <- EGID
+
+# Annotate
+rowData(newRSE) <- DataFrame(EGID)
+colData(newRSE) <- DataFrame(SITE, row.names = colnames(DNAcopyNumber[, rangeVars]))
+assayNames(newRSE) <- "copyNumber"
 
 # mRNA Expression Entrez --------------------------------------------------
 mRNAexpression <- read_delim("rawdata/CCLE_Expression_Entrez_2012-09-29.gct", delim = "\t", skip = 2)
