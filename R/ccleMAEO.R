@@ -114,6 +114,25 @@ newMut <- RaggedExperiment(newMut)
 colData <- read_csv("rawdata/CCLE_NP24.2009_Drug_data_2015.02.24.csv")
 colData <- DataFrame(colData)
 splitData <- S4Vectors::split(colData, colData[["CCLE.Cell.Line.Name"]])
+
+## Produce drug array
+allCompounds <- sort(Reduce(union, lapply(splitData, function(x) x[["Compound"]])))
+allCompounds <- DataFrame(Compound = allCompounds)
+drugVars <- c("Compound", "EC50..uM.", "IC50..uM.", "Amax", "ActArea")
+splitDrug <- lapply(splitData, function(x) {
+    drugDF <- merge(allCompounds, x[, drugVars], by = "Compound", all = TRUE)
+    rownames(drugDF) <- drugDF[["Compound"]]
+    drugDF[, -which(colnames(drugDF) == "Compound")]
+})
+
+varVect <- Reduce(unique, lapply(splitDrug, seq_along))
+names(varVect) <- Reduce(intersect, lapply(splitDrug, names))
+
+## Bug in DataFrame cbind with named list see Bioconductor/S4Vectors/issues/3
+lapply(varVect, function(y) {
+    do.call(cbind, lapply(splitDrug, function(x, y) { x[, y, drop = FALSE] }, y = y))
+    })
+
 source("R/drugDataFrame.R")
 colData <- drugDataFrame(splitData, c("Doses..uM.", "Activity.Data..median.", "Activity.SD"))
 
