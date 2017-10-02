@@ -140,6 +140,34 @@ getDrugData <- function(dataList, variables) {
             col
         }, x = splitData, y = y))
     })
+}
+
+## Produce drug array
+DrugList <- getDrugData(splitData, drugVars)
+
+nrows <- unique(vapply(DrugList, nrow, numeric(1L)))
+ncols <- unique(vapply(DrugList, ncol, numeric(1L)))
+llen <- length(DrugList)
+
+allrnames <- vapply(DrugList, rownames, character(nrows))
+dfrnames <- as.data.frame(allrnames)
+if (all(vapply(dfrnames[, seq_along(dfrnames)[-1]],
+               function(x) identical(dfrnames[[1]], x), logical(1L))))
+    rnames <- allrnames[, 1L, drop = TRUE]
+
+allcnames <- vapply(DrugList, colnames, character(ncols))
+dfcnames <- as.data.frame(allcnames)
+if (all(vapply(dfcnames[, seq_along(dfcnames)[-1]],
+               function(x) identical(dfcnames[[1]], x), logical(1L))))
+    cnames <- allcnames[, 1L, drop = TRUE]
+
+dnames <- names(DrugList)
+
+drugArray <- array(unlist(lapply(DrugList, data.matrix)),
+                   dim = c(nrows, ncols, llen),
+                   dimnames = list(rnames, cnames, dnames))
+
+DoseList <- getDrugData(splitData, doseVars)
 
 # source("R/drugDataFrame.R")
 # colData <- drugDataFrame(splitData, doseVars)
