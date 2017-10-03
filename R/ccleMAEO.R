@@ -3,7 +3,8 @@
 # A script for creating a MultiAssayExperiment Object
 # (MAEO) from Cancer Cell Line Encyclopedia (CCLE) data
 #
-# Authors: Marcel Ramos, Lucas Schiffer
+# Authors: Marcel Ramos
+# Contributor: Lucas Schiffer
 #
 ########################################################
 
@@ -168,6 +169,46 @@ drugArray <- array(unlist(lapply(DrugList, data.matrix)),
                    dimnames = list(rnames, cnames, dnames))
 
 DoseList <- getDrugData(splitData, doseVars)
+
+.replaceShorts <- function(splitList) {
+    shorts <- lengths(splitList) < 8L &
+        lengths(splitList) > 0L &
+        !is.na(splitList)
+    nas <- is.na(splitList)
+    if (any(shorts)) {
+    allVals <- Reduce(union, splitList[!shorts])
+    elemIdx <- which(shorts)
+    for (idx in elemIdx) {
+        notInShorts <- !allVals %in% splitList[[idx]]
+        valVec <- rep(NA, length(allVals))
+        valVec[notInShorts] <- NA
+        valVec[!notInShorts] <- splitList[[idx]]
+        splitList[[idx]] <- valVec
+        }
+    }
+    if (any(nas)) {
+        elemIdx <- which(nas)
+        lenSplit <- unique(lengths(splitList[!nas]))
+        stopifnot(S4Vectors::isSingleInteger(lenSplit))
+        valVect <- rep(NA, lenSplit)
+        for (idx in elemIdx) {
+            splitList[[idx]] <- valVect
+        }
+    }
+    splitList
+}
+
+# TODO Fix BUG: Some dose concentrations have 9 values instead of 8
+# for (i in seq_along(DoseList)) {
+    i <- 1L
+    lapply(DoseList[[i]], function(x) {
+        splitList <- lapply(strsplit(x, ","), as.numeric)
+        splitList <- .replaceShorts(splitList = splitList)
+        midDF <- as.data.frame(splitList, col.names = seq_len(length(splitList)))
+        plyr::aaply(t(midDF), 1L, as.numeric)
+    })
+# }
+
 
 # source("R/drugDataFrame.R")
 # colData <- drugDataFrame(splitData, doseVars)
