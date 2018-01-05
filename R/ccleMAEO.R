@@ -16,15 +16,15 @@ suppressPackageStartupMessages({
     library(Biobase)
     library(SummarizedExperiment)
     library(GenomicRanges)
-    library(MultiAssayExperiment) # https://github.com/vjcitn/MultiAssayExperiment
+    library(MultiAssayExperiment)
     library(RaggedExperiment)
     library(downloader)
 })
 
 # Check files and directories ---------------------------------------------
 dataURL <- "https://data.broadinstitute.org/ccle_legacy_data"
-folders <- c("dna_copy_number", "hybrid_capture_sequencing",
-    "mRNA_expression", "pharmacological_profiling")
+folders <- c("dna_copy_number", "mRNA_expression",
+    "hybrid_capture_sequencing", "pharmacological_profiling")
 
 filesOfInterest <- c("CCLE_copynumber_byGene_2013-12-03.txt",
     "CCLE_Expression_Entrez_2012-09-29.gct",
@@ -91,7 +91,7 @@ rownames(rowDat) <- rownames(mRNAexpression)
 mRNAexpression <- mRNAexpression[, -which(names(mRNAexpression) == "Description")]
 mRNAexpression <- as.matrix(mRNAexpression)
 
-mRNASE <- SummarizedExperiment(mRNAexpression, rowData = annoteFeatures)
+mRNASE <- SummarizedExperiment(mRNAexpression, rowData = rowDat)
 
 # Mutations ---------------------------------------------------------------
 types <- c("c", "i", "c", "i", "c", "i", "i", "c", "c", "c", "c", "c",
