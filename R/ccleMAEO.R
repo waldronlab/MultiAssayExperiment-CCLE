@@ -19,6 +19,7 @@ suppressPackageStartupMessages({
     library(MultiAssayExperiment)
     library(RaggedExperiment)
     library(downloader)
+    library(RTCGAToolbox)
 })
 
 # Check files and directories ---------------------------------------------
@@ -97,7 +98,7 @@ mRNASE <- SummarizedExperiment(mRNAexpression, rowData = rowDat)
 types <- c("c", "i", "c", "i", "c", "i", "i", "c", "c", "c", "c", "c",
   "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c",
   "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c", "c",
-  "c", "c", "c", "c", "c", "c", "c", "c", "c", "i", "i", "c", "c" )
+  "c", "c", "c", "c", "c", "c", "c", "c", "c", "i", "i", "c", "c")
 types2 <- paste(types, collapse = "")
 mutations <- read_delim("rawdata/CCLE_hybrid_capture1650_hg19_NoCommonSNPs_NoNeutralVariants_CDS_2012.05.07.maf",
                         delim = "\t", na = "<NA>", col_types = types2)
@@ -108,7 +109,7 @@ newMut <- makeGRangesListFromDataFrame(as.data.frame(mutations, stringsAsFactors
                                       start.field = "Start_position",
                                       end.field = "End_position",
                                       keep.extra.columns = TRUE)
-genome(newMut) <- TCGAutils:::.getHGBuild("37")
+genome(newMut) <- RTCGAToolbox:::.getHGBuild("37")
 newMut <- RaggedExperiment(newMut)
 
 # primary DataFrame -------------------------------------------------------
