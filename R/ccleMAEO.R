@@ -177,13 +177,11 @@ DoseList <- getDrugData(splitData, doseVars)
         !is.na(splitList)
     nas <- is.na(splitList)
     if (any(shorts)) {
-    allVals <- Reduce(union, splitList[!shorts])
+    allVals <- Reduce(union, splitList[!shorts & !nas])
     elemIdx <- which(shorts)
     for (idx in elemIdx) {
-        notInShorts <- !allVals %in% splitList[[idx]]
-        valVec <- rep(NA, length(allVals))
-        valVec[notInShorts] <- NA
-        valVec[!notInShorts] <- splitList[[idx]]
+        ## Use value matching to replace short or longer vector
+        valVec <- splitList[[idx]][match(allVals, splitList[[idx]])]
         splitList[[idx]] <- valVec
         }
     }
@@ -199,16 +197,31 @@ DoseList <- getDrugData(splitData, doseVars)
     splitList
 }
 
-# TODO Fix BUG: Some dose concentrations have 9 values instead of 8
-# for (i in seq_along(DoseList)) {
-    i <- 1L
+.replaceLongs <- function(splitList) {
+    longs <- lengths(splitList) > 9
+    nas <- is.na(splitList)
+    lenSplit <- unique(lengths(splitList[!nas & !longs]))
+    stopifnot(S4Vectors::isSingleInteger(lenSplit))
+    if (any(longs)) {
+        elemIdx <- which(longs)
+        for (idx in elemIdx) {
+            splitList[[idx]] <- rep(NA, lenSplit)
+        }
+    }
+    splitList
+}
+
+## TODO Fix BUG: Some dose concentrations have 9 values instead of 8
+## This fails with columns that have irregular lengths after strsplit
+for (i in seq_along(DoseList)) {
     lapply(DoseList[[i]], function(x) {
         splitList <- lapply(strsplit(x, ","), as.numeric)
         splitList <- .replaceShorts(splitList = splitList)
+        splitList <- .replaceLongs(splitList = splitList)
         midDF <- as.data.frame(splitList, col.names = seq_len(length(splitList)))
         plyr::aaply(t(midDF), 1L, as.numeric)
     })
-# }
+}
 
 
 # source("R/drugDataFrame.R")
